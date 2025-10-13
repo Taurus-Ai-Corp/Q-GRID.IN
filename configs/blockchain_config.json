@@ -1,0 +1,109 @@
+{
+  "platform": "AssetGrid Crypto",
+  "version": "1.0.0",
+  "description": "Blockchain Infrastructure & DeFi Automation Platform",
+  "revenue_potential": "$4M+ annually",
+  
+  "blockchain_networks": {
+    "ethereum": {
+      "enabled": true,
+      "rpc_url": "https://mainnet.infura.io/v3/YOUR_PROJECT_ID",
+      "chain_id": 1,
+      "gas_price_strategy": "fast"
+    },
+    "polygon": {
+      "enabled": true,
+      "rpc_url": "https://polygon-rpc.com",
+      "chain_id": 137,
+      "gas_price_strategy": "standard"
+    },
+    "arbitrum": {
+      "enabled": true,
+      "rpc_url": "https://arb1.arbitrum.io/rpc",
+      "chain_id": 42161,
+      "gas_price_strategy": "fast"
+    }
+  },
+  
+  "defi_protocols": {
+    "uniswap_v3": {
+      "enabled": true,
+      "contract_address": "0x1F98431c8aD98523631AE4a59f267346ea31F984",
+      "supported_pairs": ["ETH/USDC", "WBTC/ETH", "USDC/DAI"],
+      "fee_tiers": [0.05, 0.3, 1.0]
+    },
+    "aave_v3": {
+      "enabled": true,
+      "contract_address": "0x87870Bca3F3fD6335C3F4ce8392D69350B4fA4E2",
+      "supported_assets": ["ETH", "USDC", "DAI", "WBTC"],
+      "target_apy": 12.5
+    },
+    "compound": {
+      "enabled": true,
+      "contract_address": "0x3d9819210A31b4961b30EF54bE2aeD79B9c9Cd3B",
+      "supported_assets": ["ETH", "USDC", "DAI"],
+      "target_apy": 10.0
+    },
+    "curve": {
+      "enabled": true,
+      "pools": ["3pool", "tricrypto", "steth"],
+      "target_apy": 8.5
+    }
+  },
+  
+  "automation_strategies": {
+    "yield_optimization": {
+      "enabled": true,
+      "rebalance_frequency": "daily",
+      "min_apy_threshold": 8.0,
+      "max_gas_cost": 50
+    },
+    "arbitrage": {
+      "enabled": true,
+      "min_profit_threshold": 100,
+      "execution_speed": "fast"
+    },
+    "liquidity_provision": {
+      "enabled": true,
+      "impermanent_loss_protection": true,
+      "fee_collection_frequency": "daily"
+    }
+  },
+  
+  "risk_management": {
+    "max_position_size": 100000,
+    "stop_loss_percentage": 5.0,
+    "diversification_required": true,
+    "min_liquidity_threshold": 1000000
+  },
+  
+  "integrations": {
+    "coinbase": {
+      "enabled": true,
+      "api_version": "v2"
+    },
+    "hardhat": {
+      "enabled": true,
+      "network": "localhost"
+    },
+    "web3": {
+      "enabled": true,
+      "provider": "infura"
+    },
+    "github": {
+      "enabled": true,
+      "repository": "https://github.com/Taas-ai/taurus-assetgrid-crypto"
+    }
+  },
+  
+  "revenue_tracking": {
+    "enabled": true,
+    "metrics": [
+      "total_yield_generated",
+      "gas_optimization_savings",
+      "arbitrage_profits",
+      "liquidity_provision_fees"
+    ]
+  }
+}
+
