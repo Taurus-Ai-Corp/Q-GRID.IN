@@ -145,7 +145,7 @@ export default function InteractiveDeck() {
             <div className="w-3 h-3 rounded-full bg-destructive" />
             <div className="w-3 h-3 rounded-full bg-yellow-500" />
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span className="ml-4 font-mono text-sm text-muted-foreground">NOVALAX_LIVE_DEMO.exe</span>
+            <span className="ml-4 font-mono text-sm text-muted-foreground">ASSETGRID_QRM_DEMO.exe</span>
          </div>
          <div className="font-heading font-bold text-primary tracking-widest">ASSETGRID PRESENTATION</div>
       </header>

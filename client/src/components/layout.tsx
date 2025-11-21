@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut, FileCheck, Presentation, Laptop2 } from "lucide-react";
+import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut, FileCheck, Presentation, Laptop2, Wallet } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@assets/generated_images/assetgrid_quantum_logo.png";
 
@@ -8,6 +8,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+    { icon: Wallet, label: "Smart Wallet", href: "/wallet" },
     { icon: FileCheck, label: "Tokenized KYC", href: "/tokenized-kyc" },
     { icon: Presentation, label: "Live Demo Deck", href: "/demo" },
     { icon: Laptop2, label: "Offline CBDC Demo", href: "/offline-cbdc" },
