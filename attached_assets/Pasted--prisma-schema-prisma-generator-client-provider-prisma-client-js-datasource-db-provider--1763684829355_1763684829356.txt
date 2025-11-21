@@ -1,0 +1,129 @@
+// prisma/schema.prisma
+generator client {
+provider = "prisma-client-js"
+}
+datasource db {
+provider = "postgresql"
+url      = env("DATABASE_URL")
+}
+model User {
+id                String              @id @default(uuid())
+hederaAccountId   String              @unique
+email             String?             @unique
+phoneNumber       String?
+kycTokenId        String?
+kycStatus         KycStatus           @default(PENDING)
+createdAt         DateTime            @default(now())
+updatedAt         DateTime            @updatedAt
+wallets           Wallet[]
+kycVerifications  KycVerification[]
+auditLogs         AuditLog[]
+assetGridLinks    AssetGridLink[]
+}
+enum KycStatus {
+PENDING
+VERIFIED
+REJECTED
+EXPIRED
+}
+model KycVerification {
+id                    String    @id @default(uuid())
+userId                String
+user                  User      @relation(fields: [userId], references: [id])
+effisendCredentialId  String
+verificationLevel     String
+verifiedAt            DateTime?
+expiresAt             DateTime?
+verificationProof     Json?
+createdAt             DateTime  @default(now())
+@@index([userId])
+}
+model Wallet {
+id                    String        @id @default(uuid())
+userId                String
+user                  User          @relation(fields: [userId], references: [id])
+hederaAccountId       String        @unique
+walletType            WalletType
+balanceUsdc           Decimal       @default(0) @db.Decimal(20, 6)
+balanceHbar           Decimal       @default(0) @db.Decimal(20, 8)
+publicKey             String?
+encryptedPrivateKey   String?
+createdAt             DateTime      @default(now())
+sentTransactions      Transaction[] @relation("SenderWallet")
+receivedTransactions  Transaction[] @relation("ReceiverWallet")
+paymentRequests       PaymentRequest[]
+}
+enum WalletType {
+CUSTODIAL
+NON_CUSTODIAL
+}
+model Transaction {
+id                  String            @id @default(uuid())
+hederaTransactionId String            @unique
+hcsTopicId          String?
+senderWalletId      String
+senderWallet        Wallet            @relation("SenderWallet", fields: [senderWalletId], references: [id])
+receiverWalletId    String
+receiverWallet      Wallet            @relation("ReceiverWallet", fields: [receiverWalletId], references: [id])
+amount              Decimal           @db.Decimal(20, 6)
+currency            String            @default("USDC")
+transactionType     TransactionType
+status              TransactionStatus @default(PENDING)
+httpx402PaymentHash String?
+metadata            Json?
+feeAmount           Decimal?          @db.Decimal(10, 6)
+createdAt           DateTime          @default(now())
+confirmedAt         DateTime?
+paymentRequest      PaymentRequest?
+@@index([senderWalletId])
+@@index([receiverWalletId])
+@@index([status])
+@@index([createdAt(sort: Desc)])
+}
+enum TransactionType {
+PAYMENT
+REFUND
+SETTLEMENT
+WITHDRAWAL
+}
+enum TransactionStatus {
+PENDING
+CONFIRMED
+FAILED
+CANCELLED
+}
+model PaymentRequest {
+id                String            @id @default(uuid())
+paymentHash       String            @unique
+resourceUrl       String
+amount            Decimal           @db.Decimal(20, 6)
+currency          String            @default("USDC")
+merchantWalletId  String
+merchantWallet    Wallet            @relation(fields: [merchantWalletId], references: [id])
+status            PaymentStatus     @default(PENDING)
+expiresAt         DateTime
+paidTransactionId String?           @unique
+paidTransaction   Transaction?      @relation(fields: [paidTransactionId], references: [id])
+createdAt         DateTime          @default(now())
+@@index([paymentHash])
+@@index([status, expiresAt])
+}
+enum PaymentStatus {
+PENDING
+PAID
+EXPIRED
+CANCELLED
+}
+model SmartContract {
+id                String    @id @default(uuid())
+hederaContractId  String    @unique
+contractType      String
+deployedAt        DateTime?
+contractAbi       Json?
+status            String    @default("active")
+}
+model AssetGridLink {
+id          String   @id @default(uuid())
+userId      String
+user        User     @relation(fields: [userId], references: [id])
+assetType   String

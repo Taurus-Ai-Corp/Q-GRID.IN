@@ -1,13 +1,15 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut, FileCheck, Presentation } from "lucide-react";
 import { cn } from "@/lib/utils";
-import logo from "@assets/generated_images/quantum_shield_logo.png";
+import logo from "@assets/generated_images/assetgrid_quantum_logo.png";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
+    { icon: FileCheck, label: "Tokenized KYC", href: "/tokenized-kyc" },
+    { icon: Presentation, label: "Live Demo Deck", href: "/demo" },
     { icon: ScanLine, label: "Biometric Enrollment", href: "/enroll" },
     { icon: History, label: "Verification Log", href: "/logs" },
     { icon: Settings, label: "Security Settings", href: "/settings" },
@@ -18,10 +20,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Sidebar */}
       <aside className="w-64 border-r border-sidebar-border bg-sidebar flex flex-col">
         <div className="p-6 flex items-center gap-3 border-b border-sidebar-border">
-          <img src={logo} alt="Logo" className="w-8 h-8" />
+          <img src={logo} alt="Logo" className="w-8 h-8 animate-pulse" />
           <div>
-            <h1 className="font-heading font-bold text-lg tracking-wider text-primary">NOVALAX</h1>
-            <p className="text-xs text-muted-foreground tracking-widest">PAY QRM</p>
+            <h1 className="font-heading font-bold text-lg tracking-wider text-primary">AssetGrid™</h1>
+            <p className="text-xs text-muted-foreground tracking-widest">Q₹M MESH</p>
           </div>
         </div>
 

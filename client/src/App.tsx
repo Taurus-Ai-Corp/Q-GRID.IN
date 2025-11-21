@@ -8,6 +8,8 @@ import Dashboard from "@/pages/dashboard";
 import KycEnrollment from "@/pages/kyc-enrollment";
 import VerificationLog from "@/pages/verification-log";
 import Settings from "@/pages/settings";
+import TokenizedKYC from "@/pages/tokenized-kyc";
+import InteractiveDeck from "@/pages/interactive-deck";
 
 function Router() {
   return (
@@ -16,6 +18,8 @@ function Router() {
       <Route path="/enroll" component={KycEnrollment} />
       <Route path="/logs" component={VerificationLog} />
       <Route path="/settings" component={Settings} />
+      <Route path="/tokenized-kyc" component={TokenizedKYC} />
+      <Route path="/demo" component={InteractiveDeck} />
       <Route component={NotFound} />
     </Switch>
   );

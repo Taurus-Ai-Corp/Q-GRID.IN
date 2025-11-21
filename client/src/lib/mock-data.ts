@@ -121,3 +121,36 @@ export const MOCK_LOGS = [
     riskScore: 20
   }
 ];
+
+export const MOCK_KYC_CREDENTIALS = {
+  id: "did:ethr:0x89abcdef...",
+  issuer: "TAURUS AI KYC Authority",
+  issuedAt: "2024-10-29T10:30:00Z",
+  expiresAt: "2034-10-29T10:30:00Z",
+  kycLevel: "FULL_KYC",
+  attributes: {
+    name: "Alex Cipher",
+    aadhaarLastFour: "8374",
+    dob: "1990-05-15",
+    address: "Mumbai, Maharashtra",
+    biometricHash: "0x4f9e8d7c6b5a4321..."
+  },
+  proof: {
+    type: "EcdsaSecp256k1Signature2019",
+    verificationMethod: "did:ethr:0x89abcdef...#keys-1"
+  }
+};
+
+export const MOCK_AADHAAR_DATA = {
+  status: "SUCCESS",
+  authCode: "123456789012",
+  userData: {
+    name: "Alex Cipher",
+    dob: "15-05-1990",
+    address: {
+      city: "Mumbai",
+      state: "Maharashtra",
+      pincode: "400058"
+    }
+  }
+};
