@@ -61,7 +61,7 @@ export default function KycEnrollment() {
             <TabsTrigger value="facial" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-full text-base">
               <Camera className="w-4 h-4 mr-2" /> Facial Recognition
             </TabsTrigger>
-            <TabsTrigger value="fingerprint" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-full text-base">
+            <TabsTrigger value="fingerprint" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-full text-base hidden">
               <Fingerprint className="w-4 h-4 mr-2" /> Fingerprint
             </TabsTrigger>
             <TabsTrigger value="voice" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-full text-base">

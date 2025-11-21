@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Shield, Cpu, WifiOff, Radio, Server, FileCheck, Lock, Share2, Database, Activity, Smartphone } from "lucide-react";
+import { ArrowRight, ArrowLeft, Shield, Cpu, WifiOff, Radio, Server, FileCheck, Lock, Share2, Database, Activity, Smartphone, CheckCircle, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
@@ -217,6 +217,120 @@ const SLIDES = [
             Combining offline hardware security with online AI scoring achieves 
             <span className="text-primary font-bold"> 99.7% fraud prevention accuracy</span>.
          </p>
+      </div>
+    )
+  },
+  {
+    id: "live_demo_intro",
+    title: "Live Demo",
+    subtitle: "Use Case: Mumbai Chai Vendor",
+    content: (
+      <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
+        <div className="relative w-32 h-32 mb-8">
+          <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping" />
+          <div className="absolute inset-0 border-2 border-primary rounded-full animate-[spin_10s_linear_infinite]" />
+          <Globe className="w-full h-full text-primary p-6" />
+        </div>
+        <div className="flex gap-4 text-sm font-mono text-muted-foreground">
+          <span className="flex items-center gap-1"><Shield className="w-4 h-4 text-emerald-400" /> Quantum Safe</span>
+          <span className="flex items-center gap-1"><WifiOff className="w-4 h-4 text-orange-400" /> Offline Capable</span>
+        </div>
+      </div>
+    )
+  },
+  {
+    id: "simulator",
+    title: "Offline Peer-to-Peer Payment",
+    subtitle: "Simulation",
+    content: (
+      <div className="flex justify-between items-center h-80 px-10 relative">
+         {/* Payer */}
+         <div className="text-center z-10">
+            <Smartphone className="w-16 h-16 mx-auto text-gray-400 mb-2" />
+            <p className="font-bold">Customer</p>
+            <p className="text-xs text-orange-400 flex items-center justify-center gap-1"><WifiOff className="w-3 h-3" /> Offline</p>
+         </div>
+
+         {/* Connection Line */}
+         <div className="flex-1 h-1 bg-muted relative mx-4">
+            <motion.div 
+              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full shadow-[0_0_10px_#00f0ff]"
+              animate={{ x: [0, 200, 0] }}
+              transition={{ duration: 3, repeat: Infinity }}
+            />
+            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-mono text-muted-foreground">
+               NFC / BLE MESH
+            </div>
+         </div>
+
+         {/* Payee */}
+         <div className="text-center z-10">
+            <Smartphone className="w-16 h-16 mx-auto text-primary mb-2" />
+            <p className="font-bold">Chai Vendor</p>
+            <div className="mt-2 bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-xs border border-emerald-500/50 flex items-center gap-1">
+               <CheckCircle className="w-3 h-3" /> Received ₹20
+            </div>
+         </div>
+      </div>
+    )
+  },
+  {
+    id: "explorer",
+    title: "Hedera Consensus Explorer",
+    subtitle: "Live Transaction Visualization",
+    content: (
+      <div className="w-full h-80 bg-black/50 rounded-lg border border-primary/20 overflow-hidden relative font-mono text-xs p-4">
+         <div className="absolute inset-0 bg-[linear-gradient(rgba(0,240,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(0,240,255,0.05)_1px,transparent_1px)] bg-[size:20px_20px]" />
+         <div className="space-y-2 relative z-10">
+            {[...Array(5)].map((_, i) => (
+               <motion.div 
+                 key={i}
+                 initial={{ opacity: 0, x: -50 }}
+                 animate={{ opacity: 1, x: 0 }}
+                 transition={{ delay: i * 0.5, duration: 0.5 }}
+                 className="flex items-center gap-4 p-2 border-b border-primary/10"
+               >
+                 <span className="text-muted-foreground">0x{Math.random().toString(16).substring(2, 10)}...</span>
+                 <span className="text-emerald-400">CONFIRMED</span>
+                 <span className="text-primary ml-auto">{(Math.random() * 1000).toFixed(2)} QRM</span>
+               </motion.div>
+            ))}
+         </div>
+         <div className="absolute bottom-4 right-4 text-xs text-primary animate-pulse">
+            LIVE FEED :: HEDERA MAINNET
+         </div>
+      </div>
+    )
+  },
+  {
+    id: "code",
+    title: "HTTPx402 Middleware",
+    subtitle: "Seamless Payment Integration",
+    content: (
+      <div className="w-full h-80 bg-[#0d1117] rounded-lg border border-muted overflow-hidden p-4 font-mono text-xs text-gray-300 overflow-y-auto">
+        <pre>{`// AssetGrid Middleware
+const paymentMiddleware = async (req, res, next) => {
+  const { paymentHash } = req.headers;
+  
+  // 1. Verify Payment Proof on Hedera
+  const isValid = await hederaClient.verifyPayment({
+    hash: paymentHash,
+    minAmount: 500, // 5.00 QRM
+    recipient: MERCHANT_WALLET
+  });
+
+  if (!isValid) {
+    return res.status(402).json({
+      error: "Payment Required",
+      paymentRequest: generateInvoice(500)
+    });
+  }
+
+  // 2. Execute Smart Contract Logic
+  await contract.executeService(req.body);
+  
+  next();
+};`}</pre>
       </div>
     )
   }

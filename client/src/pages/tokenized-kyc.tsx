@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MOCK_KYC_CREDENTIALS, MOCK_AADHAAR_DATA } from "@/lib/mock-data";
-import { CheckCircle2, Fingerprint, FileText, ShieldCheck, Loader2, Lock, Scan } from "lucide-react";
+import { CheckCircle2, FileText, ShieldCheck, Loader2, Lock, Scan, Fingerprint } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
@@ -95,11 +95,16 @@ export default function TokenizedKYC() {
                     </div>
                     <div className="text-center space-y-2">
                       <h3 className="text-xl font-bold">Biometric Authentication</h3>
-                      <p className="text-sm text-muted-foreground">Place your finger on the scanner to verify with UIDAI</p>
+                      <p className="text-sm text-muted-foreground">
+                        Please use your <strong>external biometric scanner</strong> (STARTEK FM220) or built-in camera for facial verification.
+                      </p>
+                      <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500/20 mt-2">
+                        <Fingerprint className="w-3 h-3 mr-1" /> External Hardware Required
+                      </Badge>
                     </div>
                     <Button onClick={handleBiometricCapture} disabled={verifying} className="w-full max-w-xs bg-primary text-background hover:bg-primary/90">
                       {verifying ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Fingerprint className="w-4 h-4 mr-2" />}
-                      {verifying ? "Verifying..." : "Capture & Verify"}
+                      {verifying ? "Verifying..." : "Simulate Hardware Scan"}
                     </Button>
                   </div>
                 )}
