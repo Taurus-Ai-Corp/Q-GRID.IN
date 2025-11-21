@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowRight, ArrowLeft, Shield, Cpu, WifiOff, Radio, Server, FileCheck, Lock, Share2, Database, Activity, Smartphone, CheckCircle, Globe } from "lucide-react";
+import { ArrowRight, ArrowLeft, Shield, Cpu, WifiOff, Radio, Server, FileCheck, Lock, Share2, Database, Activity, Smartphone, CheckCircle, Globe, TrainFront, Tent, AlertTriangle, Signal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 // Mock Images (Replace with generated assets)
 import chipImage from "@assets/generated_images/secure_element_chip_macro.png";
@@ -239,38 +240,138 @@ const SLIDES = [
     )
   },
   {
-    id: "simulator",
-    title: "Offline Peer-to-Peer Payment",
-    subtitle: "Simulation",
+    id: "unlimited_offline",
+    title: "Unlimited Offline Payments",
+    subtitle: "Real-World Scenarios",
     content: (
-      <div className="flex justify-between items-center h-80 px-10 relative">
-         {/* Payer */}
-         <div className="text-center z-10">
-            <Smartphone className="w-16 h-16 mx-auto text-gray-400 mb-2" />
-            <p className="font-bold">Customer</p>
-            <p className="text-xs text-orange-400 flex items-center justify-center gap-1"><WifiOff className="w-3 h-3" /> Offline</p>
-         </div>
+      <div className="h-full flex flex-col">
+        <Tabs defaultValue="rural" className="w-full h-full flex flex-col">
+          <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 border border-primary/20">
+            <TabsTrigger value="rural" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+               <Globe className="w-4 h-4 mr-2" /> Rural Village
+            </TabsTrigger>
+            <TabsTrigger value="metro" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+               <TrainFront className="w-4 h-4 mr-2" /> Metro Transit
+            </TabsTrigger>
+            <TabsTrigger value="disaster" className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary">
+               <Tent className="w-4 h-4 mr-2" /> Disaster Relief
+            </TabsTrigger>
+          </TabsList>
 
-         {/* Connection Line */}
-         <div className="flex-1 h-1 bg-muted relative mx-4">
-            <motion.div 
-              className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-primary rounded-full shadow-[0_0_10px_#00f0ff]"
-              animate={{ x: [0, 200, 0] }}
-              transition={{ duration: 3, repeat: Infinity }}
-            />
-            <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs font-mono text-muted-foreground">
-               NFC / BLE MESH
-            </div>
-         </div>
+          {/* Scenario 1: Rural Village */}
+          <TabsContent value="rural" className="flex-1 mt-0 animate-in fade-in slide-in-from-bottom-4">
+             <div className="grid grid-cols-2 gap-8 h-full items-center">
+                <div className="space-y-6">
+                   <div className="flex items-center gap-3 text-orange-400 mb-4">
+                      <Signal className="w-6 h-6 text-destructive animate-pulse" />
+                      <span className="font-mono text-sm font-bold">NO NETWORK COVERAGE</span>
+                   </div>
+                   <h3 className="text-2xl font-bold">Remote Village Market</h3>
+                   <p className="text-muted-foreground">
+                      A farmer purchasing supplies in a remote area with zero cellular connectivity.
+                      Transactions are signed locally and stored in the secure element.
+                   </p>
+                   <div className="p-4 bg-primary/10 rounded-lg border border-primary/20">
+                      <div className="flex justify-between text-sm mb-2">
+                         <span className="text-muted-foreground">Offline Wallet Balance</span>
+                         <span className="font-mono font-bold">₹4,500.00</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                         <span className="text-muted-foreground">Pending Sync</span>
+                         <span className="font-mono text-orange-400">12 Txs</span>
+                      </div>
+                   </div>
+                </div>
+                <div className="relative h-64 bg-black/40 rounded-xl border border-border flex items-center justify-center overflow-hidden">
+                   <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1566555698097-69cb6e9290b5?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+                   <div className="z-10 text-center">
+                      <Smartphone className="w-16 h-16 mx-auto text-primary mb-4" />
+                      <div className="bg-background/80 backdrop-blur px-4 py-2 rounded-full border border-primary/50 text-xs font-mono">
+                         Peers Connected: 15
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </TabsContent>
 
-         {/* Payee */}
-         <div className="text-center z-10">
-            <Smartphone className="w-16 h-16 mx-auto text-primary mb-2" />
-            <p className="font-bold">Chai Vendor</p>
-            <div className="mt-2 bg-emerald-500/20 text-emerald-400 px-2 py-1 rounded text-xs border border-emerald-500/50 flex items-center gap-1">
-               <CheckCircle className="w-3 h-3" /> Received ₹20
-            </div>
-         </div>
+          {/* Scenario 2: Metro Transit */}
+          <TabsContent value="metro" className="flex-1 mt-0 animate-in fade-in slide-in-from-bottom-4">
+             <div className="grid grid-cols-2 gap-8 h-full items-center">
+                <div className="space-y-6">
+                   <div className="flex items-center gap-3 text-orange-400 mb-4">
+                      <WifiOff className="w-6 h-6" />
+                      <span className="font-mono text-sm font-bold">UNDERGROUND / TUNNEL</span>
+                   </div>
+                   <h3 className="text-2xl font-bold">Metro Ticketing</h3>
+                   <p className="text-muted-foreground">
+                      High-speed turnstile access underground. 300ms tap-and-go latency without server validation.
+                   </p>
+                   <div className="flex gap-4">
+                      <div className="flex-1 p-4 bg-card rounded-lg border border-border text-center">
+                         <div className="text-2xl font-bold text-primary">0.3s</div>
+                         <div className="text-xs text-muted-foreground">Latency</div>
+                      </div>
+                      <div className="flex-1 p-4 bg-card rounded-lg border border-border text-center">
+                         <div className="text-2xl font-bold text-emerald-400">∞</div>
+                         <div className="text-xs text-muted-foreground">Consecutive Txs</div>
+                      </div>
+                   </div>
+                </div>
+                <div className="relative h-64 bg-black/40 rounded-xl border border-border flex items-center justify-center overflow-hidden">
+                   <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1556380673-76276056c03e?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+                   <div className="z-10 flex items-center gap-8">
+                      <Smartphone className="w-12 h-12 text-gray-400" />
+                      <ArrowRight className="w-8 h-8 text-primary animate-pulse" />
+                      <div className="w-16 h-16 rounded-full border-4 border-primary flex items-center justify-center">
+                         <CheckCircle className="w-8 h-8 text-primary" />
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </TabsContent>
+
+          {/* Scenario 3: Disaster Relief */}
+          <TabsContent value="disaster" className="flex-1 mt-0 animate-in fade-in slide-in-from-bottom-4">
+             <div className="grid grid-cols-2 gap-8 h-full items-center">
+                <div className="space-y-6">
+                   <div className="flex items-center gap-3 text-destructive mb-4">
+                      <AlertTriangle className="w-6 h-6 animate-bounce" />
+                      <span className="font-mono text-sm font-bold">INFRASTRUCTURE DOWN</span>
+                   </div>
+                   <h3 className="text-2xl font-bold">Emergency Relief</h3>
+                   <p className="text-muted-foreground">
+                      Aid workers distributing digital cash credits to victims in a disaster zone where towers are down.
+                   </p>
+                   <div className="p-4 bg-destructive/10 rounded-lg border border-destructive/20">
+                      <h4 className="font-bold text-destructive mb-2">Aid Worker Terminal</h4>
+                      <div className="space-y-2 text-sm">
+                         <div className="flex justify-between">
+                            <span>Recipients Serviced</span>
+                            <span className="font-mono">1,245</span>
+                         </div>
+                         <div className="flex justify-between">
+                            <span>Total Disbursed</span>
+                            <span className="font-mono">₹50,00,000</span>
+                         </div>
+                      </div>
+                   </div>
+                </div>
+                <div className="relative h-64 bg-black/40 rounded-xl border border-border flex items-center justify-center overflow-hidden">
+                   <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1584268389256-0c59b4285a9d?q=80&w=1000&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+                   <div className="z-10 text-center">
+                      <div className="flex justify-center gap-4 mb-4">
+                         <Smartphone className="w-10 h-10 text-primary" />
+                         <Smartphone className="w-10 h-10 text-gray-400" />
+                         <Smartphone className="w-10 h-10 text-gray-400" />
+                      </div>
+                      <div className="bg-destructive text-white px-3 py-1 rounded text-xs font-bold animate-pulse">
+                         MESH NETWORK ACTIVE
+                      </div>
+                   </div>
+                </div>
+             </div>
+          </TabsContent>
+        </Tabs>
       </div>
     )
   },
