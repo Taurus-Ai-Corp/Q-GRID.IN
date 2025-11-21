@@ -1,0 +1,112 @@
+// Add to existing schema.prisma
+model BiometricProfile {
+id                    String                  @id @default(uuid())
+userId                String
+user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+biometricType         BiometricType
+templateHash          String
+encryptedTemplate     String                  @db.Text
+quantumSignature      String?                 @db.Text
+livenessScore         Decimal?                @db.Decimal(5, 2)
+qualityScore          Decimal?                @db.Decimal(5, 2)
+enrolledAt            DateTime                @default(now())
+lastVerifiedAt        DateTime?
+verificationCount     Int                     @default(0)
+status                BiometricStatus         @default(ACTIVE)
+deviceInfo            Json?
+verifications         BiometricVerification[]
+kycVerifications      KycVerification[]
+@@unique([userId, biometricType])
+@@index([userId, biometricType])
+@@index([status])
+}
+enum BiometricType {
+FACIAL
+FINGERPRINT
+VOICE
+IRIS
+BEHAVIORAL
+}
+enum BiometricStatus {
+ACTIVE
+SUSPENDED
+REVOKED
+EXPIRED
+}
+model BiometricVerification {
+id                    String              @id @default(uuid())
+biometricProfileId    String
+biometricProfile      BiometricProfile    @relation(fields: [biometricProfileId], references: [id])
+userId                String
+user                  User                @relation(fields: [userId], references: [id])
+verificationType      String
+matchScore            Decimal             @db.Decimal(5, 2)
+livenessPassed        Boolean
+antiSpoofingPassed    Boolean
+verificationResult    VerificationResult
+failureReason         String?
+ipAddress             String?
+deviceFingerprint     String?
+geolocation           Json?
+verifiedAt            DateTime            @default(now())
+transactions          Transaction[]
+@@index([userId, verifiedAt(sort: Desc)])
+@@index([verificationResult])
+}
+enum VerificationResult {
+SUCCESS
+FAILED
+SUSPICIOUS
+RETRY_REQUIRED
+}
+model BiometricFraudAlert {
+id          String              @id @default(uuid())
+userId      String
+user        User                @relation(fields: [userId], references: [id])
+alertType   String
+severity    AlertSeverity
+details     Json
+detectedAt  DateTime            @default(now())
+resolved    Boolean             @default(false)
+resolvedAt  DateTime?
+@@index([userId, detectedAt(sort: Desc)])
+@@index([severity, resolved])
+}
+enum AlertSeverity {
+LOW
+MEDIUM
+HIGH
+CRITICAL
+}
+model QuantumKey {
+id                    String    @id @default(uuid())
+userId                String
+user                  User      @relation(fields: [userId], references: [id])
+keyType               String
+publicKey             String    @db.Text
+encryptedPrivateKey   String    @db.Text
+createdAt             DateTime  @default(now())
+rotatedAt             DateTime?
+status                String    @default("active")
+}
+// Update existing models with biometric relations
+model User {
+// ... existing fields
+biometricProfiles     BiometricProfile[]
+biometricVerifications BiometricVerification[]
+biometricFraudAlerts  BiometricFraudAlert[]
+quantumKeys           QuantumKey[]
+}
+model KycVerification {
+// ... existing fields
+biometricProfileId    String?
+biometricProfile      BiometricProfile?   @relation(fields: [biometricProfileId], references: [id])
+biometricVerified     Boolean             @default(false)
+riskScore             Decimal?            @db.Decimal(5, 2)
+}
+model Transaction {
+// ... existing fields
+biometricAuthRequired Boolean             @default(false)
+biometricVerificationId String?           @unique
+biometricVerification BiometricVerification? @relation(fields: [biometricVerificationId], references: [id])
+}

@@ -1,0 +1,437 @@
+# BIOMETRIC KYC INTEGRATION FOR QRM (QUANTUM-RESISTANT PAYMENT MODULE)
+
+---
+
+## COMPREHENSIVE BIOMETRIC KYC ARCHITECTURE
+
+### **Enhanced Product Specification: NovalaxPay with Biometric KYC**
+
+PROJECT: NovalaxPay QRM (Quantum-Resistant Module) with Biometric KYC
+INTEGRATION: EffiSend Tokenized KYC + Biometric Authentication Layer
+
+---
+
+## PART 1: BIOMETRIC KYC SYSTEM ARCHITECTURE
+
+### **1.1 Biometric Modalities Supported**
+
+const BIOMETRIC_TYPES = {
+  FACIAL_RECOGNITION: {
+    provider: "AWS Rekognition / Azure Face API",
+    accuracy: "99.9%",
+    liveness_detection: true,
+    use_case: "Primary identity verification"
+  },
+  FINGERPRINT: {
+    provider: "Native device sensors (iOS/Android)",
+    accuracy: "99.8%",
+    use_case: "Transaction authorization"
+  },
+  VOICE_BIOMETRICS: {
+    provider: "Nuance VocalPassword / Pindrop",
+    accuracy: "99.5%",
+    use_case: "Phone-based verification"
+  },
+  IRIS_SCAN: {
+    provider: "IrisGuard / Aadhaar integration (India)",
+    accuracy: "99.99%",
+    use_case: "High-security institutional accounts"
+  },
+  BEHAVIORAL_BIOMETRICS: {
+    provider: "BioCatch / Plurilock",
+    metrics: ["typing_patterns", "device_handling", "navigation_behavior"],
+    use_case: "Continuous authentication"
+  }
+}
+
+### **1.2 Enhanced Database Schema (PostgreSQL + Neon)**
+
+-- Biometric KYC Tables
+
+-- Biometric Profiles
+CREATE TABLE biometric_profiles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+  biometric_type VARCHAR(50) NOT NULL, -- facial, fingerprint, voice, iris
+  template_hash VARCHAR(128) NOT NULL, -- SHA-512 hash of biometric template
+  encrypted_template TEXT NOT NULL, -- AES-256 encrypted biometric data
+  quantum_signature TEXT, -- Post-quantum cryptographic signature (CRYSTALS-Dilithium)
+  liveness_score DECIMAL(5,2), -- 0-100 liveness detection confidence
+  quality_score DECIMAL(5,2), -- 0-100 biometric quality
+  enrolled_at TIMESTAMP DEFAULT NOW(),
+  last_verified_at TIMESTAMP,
+  verification_count INTEGER DEFAULT 0,
+  status VARCHAR(20) DEFAULT 'active', -- active, suspended, revoked
+  device_info JSONB, -- Device used for enrollment
+  
+  UNIQUE(user_id, biometric_type),
+  INDEX idx_user_biometric (user_id, biometric_type),
+  INDEX idx_status (status)
+);
+
+-- Biometric Verification Logs
+CREATE TABLE biometric_verifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  biometric_profile_id UUID REFERENCES biometric_profiles(id),
+  user_id UUID REFERENCES users(id),
+  verification_type VARCHAR(50), -- enrollment, authentication, transaction_auth
+  match_score DECIMAL(5,2), -- 0-100 biometric match confidence
+  liveness_passed BOOLEAN,
+  anti_spoofing_passed BOOLEAN,
+  verification_result VARCHAR(20), -- success, failed, suspicious
+  failure_reason TEXT,
+  ip_address INET,
+  device_fingerprint VARCHAR(255),
+  geolocation JSONB,
+  verified_at TIMESTAMP DEFAULT NOW(),
+  
+  INDEX idx_user_verification (user_id, verified_at DESC),
+  INDEX idx_result (verification_result)
+);
+
+-- Enhanced KYC with Biometric Link
+ALTER TABLE kyc_verifications ADD COLUMN biometric_profile_id UUID REFERENCES biometric_profiles(id);
+ALTER TABLE kyc_verifications ADD COLUMN biometric_verified BOOLEAN DEFAULT false;
+ALTER TABLE kyc_verifications ADD COLUMN risk_score DECIMAL(5,2); -- 0-100 fraud risk assessment
+
+-- Transaction Authorization with Biometrics
+ALTER TABLE transactions ADD COLUMN biometric_auth_required BOOLEAN DEFAULT false;
+ALTER TABLE transactions ADD COLUMN biometric_verification_id UUID REFERENCES biometric_verifications(id);
+
+-- Biometric Fraud Detection
+CREATE TABLE biometric_fraud_alerts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  alert_type VARCHAR(50), -- spoofing_attempt, multiple_failed_auth, device_mismatch
+  severity VARCHAR(20), -- low, medium, high, critical
+  details JSONB,
+  detected_at TIMESTAMP DEFAULT NOW(),
+  resolved BOOLEAN DEFAULT false,
+  resolved_at TIMESTAMP,
+  
+  INDEX idx_user_alerts (user_id, detected_at DESC),
+  INDEX idx_severity_unresolved (severity, resolved)
+);
+
+-- Quantum-Safe Key Storage
+CREATE TABLE quantum_keys (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  key_type VARCHAR(50), -- dilithium, kyber, sphincs
+  public_key TEXT NOT NULL,
+  encrypted_private_key TEXT NOT NULL, -- Encrypted with biometric-derived key
+  created_at TIMESTAMP DEFAULT NOW(),
+  rotated_at TIMESTAMP,
+  status VARCHAR(20) DEFAULT 'active'
+);
+
+### **1.3 Prisma Schema Enhancement**
+
+// Add to existing schema.prisma
+
+model BiometricProfile {
+  id                    String                  @id @default(uuid())
+  userId                String
+  user                  User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  biometricType         BiometricType
+  templateHash          String
+  encryptedTemplate     String                  @db.Text
+  quantumSignature      String?                 @db.Text
+  livenessScore         Decimal?                @db.Decimal(5, 2)
+  qualityScore          Decimal?                @db.Decimal(5, 2)
+  enrolledAt            DateTime                @default(now())
+  lastVerifiedAt        DateTime?
+  verificationCount     Int                     @default(0)
+  status                BiometricStatus         @default(ACTIVE)
+  deviceInfo            Json?
+  verifications         BiometricVerification[]
+  kycVerifications      KycVerification[]
+  
+  @@unique([userId, biometricType])
+  @@index([userId, biometricType])
+  @@index([status])
+}
+
+enum BiometricType {
+  FACIAL
+  FINGERPRINT
+  VOICE
+  IRIS
+  BEHAVIORAL
+}
+
+enum BiometricStatus {
+  ACTIVE
+  SUSPENDED
+  REVOKED
+  EXPIRED
+}
+
+model BiometricVerification {
+  id                    String              @id @default(uuid())
+  biometricProfileId    String
+  biometricProfile      BiometricProfile    @relation(fields: [biometricProfileId], references: [id])
+  userId                String
+  user                  User                @relation(fields: [userId], references: [id])
+  verificationType      String
+  matchScore            Decimal             @db.Decimal(5, 2)
+  livenessPassed        Boolean
+  antiSpoofingPassed    Boolean
+  verificationResult    VerificationResult
+  failureReason         String?
+  ipAddress             String?
+  deviceFingerprint     String?
+  geolocation           Json?
+  verifiedAt            DateTime            @default(now())
+  transactions          Transaction[]
+  
+  @@index([userId, verifiedAt(sort: Desc)])
+  @@index([verificationResult])
+}
+
+enum VerificationResult {
+  SUCCESS
+  FAILED
+  SUSPICIOUS
+  RETRY_REQUIRED
+}
+
+model BiometricFraudAlert {
+  id          String              @id @default(uuid())
+  userId      String
+  user        User                @relation(fields: [userId], references: [id])
+  alertType   String
+  severity    AlertSeverity
+  details     Json
+  detectedAt  DateTime            @default(now())
+  resolved    Boolean             @default(false)
+  resolvedAt  DateTime?
+  
+  @@index([userId, detectedAt(sort: Desc)])
+  @@index([severity, resolved])
+}
+
+enum AlertSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model QuantumKey {
+  id                    String    @id @default(uuid())
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id])
+  keyType               String
+  publicKey             String    @db.Text
+  encryptedPrivateKey   String    @db.Text
+  createdAt             DateTime  @default(now())
+  rotatedAt             DateTime?
+  status                String    @default("active")
+}
+
+// Update existing models with biometric relations
+model User {
+  // ... existing fields
+  biometricProfiles     BiometricProfile[]
+  biometricVerifications BiometricVerification[]
+  biometricFraudAlerts  BiometricFraudAlert[]
+  quantumKeys           QuantumKey[]
+}
+
+model KycVerification {
+  // ... existing fields
+  biometricProfileId    String?
+  biometricProfile      BiometricProfile?   @relation(fields: [biometricProfileId], references: [id])
+  biometricVerified     Boolean             @default(false)
+  riskScore             Decimal?            @db.Decimal(5, 2)
+}
+
+model Transaction {
+  // ... existing fields
+  biometricAuthRequired Boolean             @default(false)
+  biometricVerificationId String?           @unique
+  biometricVerification BiometricVerification? @relation(fields: [biometricVerificationId], references: [id])
+}
+
+---
+
+## PART 2: BIOMETRIC KYC IMPLEMENTATION
+
+### **2.1 Backend API Routes (Node.js/Express)**
+
+// src/api/biometric-kyc/enroll.ts
+
+import { Client, PrivateKey } from "@hashgraph/sdk";
+import AWS from "aws-sdk";
+import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
+import { encryptBiometricTemplate, generateQuantumSignature } from "@/lib/crypto";
+
+const rekognition = new AWS.Rekognition({ region: "us-east-1" });
+
+export async function enrollBiometric(req, res) {
+  try {
+    const { userId, biometricType, imageData, deviceInfo } = req.body;
+
+    // 1. Liveness Detection
+    const livenessCheck = await rekognition.detectFaces({
+      Image: { Bytes: Buffer.from(imageData, 'base64') },
+      Attributes: ['ALL']
+    }).promise();
+
+    const livenessScore = calculateLivenessScore(livenessCheck);
+    
+    if (livenessScore < 85) {
+      return res.status(400).json({ 
+        error: "Liveness check failed",
+        score: livenessScore 
+      });
+    }
+
+    // 2. Extract Biometric Features
+    const faceDetails = livenessCheck.FaceDetails[0];
+    const biometricTemplate = extractBiometricFeatures(faceDetails);
+
+    // 3. Generate Template Hash (SHA-512)
+    const templateHash = crypto
+      .createHash('sha512')
+      .update(JSON.stringify(biometricTemplate))
+      .digest('hex');
+
+    // 4. Encrypt Template with AES-256
+    const encryptedTemplate = await encryptBiometricTemplate(
+      biometricTemplate,
+      userId
+    );
+
+    // 5. Generate Quantum-Resistant Signature (CRYSTALS-Dilithium)
+    const quantumSignature = await generateQuantumSignature(
+      templateHash,
+      userId
+    );
+
+    // 6. Store in Database
+    const biometricProfile = await prisma.biometricProfile.create({
+      data: {
+        userId,
+        biometricType: biometricType.toUpperCase(),
+        templateHash,
+        encryptedTemplate,
+        quantumSignature,
+        livenessScore: livenessScore,
+        qualityScore: faceDetails.Quality.Brightness,
+        deviceInfo,
+        status: 'ACTIVE'
+      }
+    });
+
+    // 7. Record on Hedera Consensus Service
+    const client = Client.forMainnet();
+    client.setOperator(
+      process.env.HEDERA_OPERATOR_ID,
+      PrivateKey.fromString(process.env.HEDERA_OPERATOR_KEY)
+    );
+
+    const hcsMessage = {
+      action: "BIOMETRIC_ENROLLMENT",
+      userId,
+      biometricType,
+      templateHash,
+      quantumSignature,
+      timestamp: new Date().toISOString()
+    };
+
+    // Submit to HCS Topic
+    const topicId = process.env.HEDERA_KYC_TOPIC_ID;
+    await submitToHCS(client, topicId, hcsMessage);
+
+    // 8. Create KYC Verification Record
+    await prisma.kycVerification.create({
+      data: {
+        userId,
+        effisendCredentialId: `BIO-${biometricProfile.id}`,
+        verificationLevel: 'BIOMETRIC_ADVANCED',
+        biometricProfileId: biometricProfile.id,
+        biometricVerified: true,
+        riskScore: calculateRiskScore(livenessScore, faceDetails),
+        verifiedAt: new Date()
+      }
+    });
+
+    res.json({
+      success: true,
+      profileId: biometricProfile.id,
+      livenessScore,
+      message: "Biometric enrollment successful"
+    });
+
+  } catch (error) {
+    console.error("Biometric enrollment error:", error);
+    res.status(500).json({ error: "Enrollment failed" });
+  }
+}
+
+// Helper Functions
+
+function calculateLivenessScore(faceDetection) {
+  const face = faceDetection.FaceDetails[0];
+  let score = 100;
+
+  // Deduct points for low confidence
+  if (face.Confidence < 99) score -= (99 - face.Confidence);
+  
+  // Check for eyes open
+  if (!face.EyesOpen?.Value) score -= 20;
+  
+  // Check for mouth closed (natural state)
+  if (face.MouthOpen?.Value) score -= 10;
+  
+  // Check for head pose (should be facing camera)
+  if (Math.abs(face.Pose.Yaw) > 15) score -= 15;
+  if (Math.abs(face.Pose.Pitch) > 15) score -= 15;
+  
+  return Math.max(0, score);
+}
+
+function extractBiometricFeatures(faceDetails) {
+  return {
+    landmarks: faceDetails.Landmarks,
+    boundingBox: faceDetails.BoundingBox,
+    pose: faceDetails.Pose,
+    quality: faceDetails.Quality,
+    // Store only feature vectors, not raw image
+    featureVector: generateFeatureVector(faceDetails)
+  };
+}
+
+function generateFeatureVector(faceDetails) {
+  // Generate 128-dimensional feature vector
+  const landmarks = faceDetails.Landmarks;
+  const vector = [];
+  
+  landmarks.forEach(landmark => {
+    vector.push(landmark.X, landmark.Y);
+  });
+  
+  return vector;
+}
+
+function calculateRiskScore(livenessScore, faceDetails) {
+  let riskScore = 0;
+  
+  // Lower liveness = higher risk
+  riskScore += (100 - livenessScore) * 0.5;
+  
+  // Low quality = higher risk
+  if (faceDetails.Quality.Brightness < 50) riskScore += 10;
+  if (faceDetails.Quality.Sharpness < 50) riskScore += 10;
+  
+  // Sunglasses/face occlusion = higher risk
+  if (faceDetails.Sunglasses?.Value) riskScore += 20;
+  
+  return Math.min(100, riskScore);
+}
+
+async function submitToHCS(client, topicId, message) {
+  const { TopicMessageSubmitTransaction } =

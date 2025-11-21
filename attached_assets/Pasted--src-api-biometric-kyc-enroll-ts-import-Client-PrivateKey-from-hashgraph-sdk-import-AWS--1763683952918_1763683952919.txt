@@ -1,0 +1,175 @@
+// src/api/biometric-kyc/enroll.ts
+
+import { Client, PrivateKey } from "@hashgraph/sdk";
+import AWS from "aws-sdk";
+import crypto from "crypto";
+import { prisma } from "@/lib/prisma";
+import { encryptBiometricTemplate, generateQuantumSignature } from "@/lib/crypto";
+
+const rekognition = new AWS.Rekognition({ region: "us-east-1" });
+
+export async function enrollBiometric(req, res) {
+  try {
+    const { userId, biometricType, imageData, deviceInfo } = req.body;
+
+    // 1. Liveness Detection
+    const livenessCheck = await rekognition.detectFaces({
+      Image: { Bytes: Buffer.from(imageData, 'base64') },
+      Attributes: ['ALL']
+    }).promise();
+
+    const livenessScore = calculateLivenessScore(livenessCheck);
+    
+    if (livenessScore < 85) {
+      return res.status(400).json({ 
+        error: "Liveness check failed",
+        score: livenessScore 
+      });
+    }
+
+    // 2. Extract Biometric Features
+    const faceDetails = livenessCheck.FaceDetails[0];
+    const biometricTemplate = extractBiometricFeatures(faceDetails);
+
+    // 3. Generate Template Hash (SHA-512)
+    const templateHash = crypto
+      .createHash('sha512')
+      .update(JSON.stringify(biometricTemplate))
+      .digest('hex');
+
+    // 4. Encrypt Template with AES-256
+    const encryptedTemplate = await encryptBiometricTemplate(
+      biometricTemplate,
+      userId
+    );
+
+    // 5. Generate Quantum-Resistant Signature (CRYSTALS-Dilithium)
+    const quantumSignature = await generateQuantumSignature(
+      templateHash,
+      userId
+    );
+
+    // 6. Store in Database
+    const biometricProfile = await prisma.biometricProfile.create({
+      data: {
+        userId,
+        biometricType: biometricType.toUpperCase(),
+        templateHash,
+        encryptedTemplate,
+        quantumSignature,
+        livenessScore: livenessScore,
+        qualityScore: faceDetails.Quality.Brightness,
+        deviceInfo,
+        status: 'ACTIVE'
+      }
+    });
+
+    // 7. Record on Hedera Consensus Service
+    const client = Client.forMainnet();
+    client.setOperator(
+      process.env.HEDERA_OPERATOR_ID,
+      PrivateKey.fromString(process.env.HEDERA_OPERATOR_KEY)
+    );
+
+    const hcsMessage = {
+      action: "BIOMETRIC_ENROLLMENT",
+      userId,
+      biometricType,
+      templateHash,
+      quantumSignature,
+      timestamp: new Date().toISOString()
+    };
+
+    // Submit to HCS Topic
+    const topicId = process.env.HEDERA_KYC_TOPIC_ID;
+    await submitToHCS(client, topicId, hcsMessage);
+
+    // 8. Create KYC Verification Record
+    await prisma.kycVerification.create({
+      data: {
+        userId,
+        effisendCredentialId: `BIO-\${biometricProfile.id}`,
+        verificationLevel: 'BIOMETRIC_ADVANCED',
+        biometricProfileId: biometricProfile.id,
+        biometricVerified: true,
+        riskScore: calculateRiskScore(livenessScore, faceDetails),
+        verifiedAt: new Date()
+      }
+    });
+
+    res.json({
+      success: true,
+      profileId: biometricProfile.id,
+      livenessScore,
+      message: "Biometric enrollment successful"
+    });
+
+  } catch (error) {
+    console.error("Biometric enrollment error:", error);
+    res.status(500).json({ error: "Enrollment failed" });
+  }
+}
+
+// Helper Functions
+
+function calculateLivenessScore(faceDetection) {
+  const face = faceDetection.FaceDetails[0];
+  let score = 100;
+
+  // Deduct points for low confidence
+  if (face.Confidence < 99) score -= (99 - face.Confidence);
+  
+  // Check for eyes open
+  if (!face.EyesOpen?.Value) score -= 20;
+  
+  // Check for mouth closed (natural state)
+  if (face.MouthOpen?.Value) score -= 10;
+  
+  // Check for head pose (should be facing camera)
+  if (Math.abs(face.Pose.Yaw) > 15) score -= 15;
+  if (Math.abs(face.Pose.Pitch) > 15) score -= 15;
+  
+  return Math.max(0, score);
+}
+
+function extractBiometricFeatures(faceDetails) {
+  return {
+    landmarks: faceDetails.Landmarks,
+    boundingBox: faceDetails.BoundingBox,
+    pose: faceDetails.Pose,
+    quality: faceDetails.Quality,
+    // Store only feature vectors, not raw image
+    featureVector: generateFeatureVector(faceDetails)
+  };
+}
+
+function generateFeatureVector(faceDetails) {
+  // Generate 128-dimensional feature vector
+  const landmarks = faceDetails.Landmarks;
+  const vector = [];
+  
+  landmarks.forEach(landmark => {
+    vector.push(landmark.X, landmark.Y);
+  });
+  
+  return vector;
+}
+
+function calculateRiskScore(livenessScore, faceDetails) {
+  let riskScore = 0;
+  
+  // Lower liveness = higher risk
+  riskScore += (100 - livenessScore) * 0.5;
+  
+  // Low quality = higher risk
+  if (faceDetails.Quality.Brightness < 50) riskScore += 10;
+  if (faceDetails.Quality.Sharpness < 50) riskScore += 10;
+  
+  // Sunglasses/face occlusion = higher risk
+  if (faceDetails.Sunglasses?.Value) riskScore += 20;
+  
+  return Math.min(100, riskScore);
+}
+
+async function submitToHCS(client, topicId, message) {
+  const { TopicMessageSubmitTransaction } =

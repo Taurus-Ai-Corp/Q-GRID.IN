@@ -1,0 +1,69 @@
+-- Biometric KYC Tables
+-- Biometric Profiles
+CREATE TABLE biometric_profiles (
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+biometric_type VARCHAR(50) NOT NULL, -- facial, fingerprint, voice, iris
+template_hash VARCHAR(128) NOT NULL, -- SHA-512 hash of biometric template
+encrypted_template TEXT NOT NULL, -- AES-256 encrypted biometric data
+quantum_signature TEXT, -- Post-quantum cryptographic signature (CRYSTALS-Dilithium)
+liveness_score DECIMAL(5,2), -- 0-100 liveness detection confidence
+quality_score DECIMAL(5,2), -- 0-100 biometric quality
+enrolled_at TIMESTAMP DEFAULT NOW(),
+last_verified_at TIMESTAMP,
+verification_count INTEGER DEFAULT 0,
+status VARCHAR(20) DEFAULT 'active', -- active, suspended, revoked
+device_info JSONB, -- Device used for enrollment
+UNIQUE(user_id, biometric_type),
+INDEX idx_user_biometric (user_id, biometric_type),
+INDEX idx_status (status)
+);
+-- Biometric Verification Logs
+CREATE TABLE biometric_verifications (
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+biometric_profile_id UUID REFERENCES biometric_profiles(id),
+user_id UUID REFERENCES users(id),
+verification_type VARCHAR(50), -- enrollment, authentication, transaction_auth
+match_score DECIMAL(5,2), -- 0-100 biometric match confidence
+liveness_passed BOOLEAN,
+anti_spoofing_passed BOOLEAN,
+verification_result VARCHAR(20), -- success, failed, suspicious
+failure_reason TEXT,
+ip_address INET,
+device_fingerprint VARCHAR(255),
+geolocation JSONB,
+verified_at TIMESTAMP DEFAULT NOW(),
+INDEX idx_user_verification (user_id, verified_at DESC),
+INDEX idx_result (verification_result)
+);
+-- Enhanced KYC with Biometric Link
+ALTER TABLE kyc_verifications ADD COLUMN biometric_profile_id UUID REFERENCES biometric_profiles(id);
+ALTER TABLE kyc_verifications ADD COLUMN biometric_verified BOOLEAN DEFAULT false;
+ALTER TABLE kyc_verifications ADD COLUMN risk_score DECIMAL(5,2); -- 0-100 fraud risk assessment
+-- Transaction Authorization with Biometrics
+ALTER TABLE transactions ADD COLUMN biometric_auth_required BOOLEAN DEFAULT false;
+ALTER TABLE transactions ADD COLUMN biometric_verification_id UUID REFERENCES biometric_verifications(id);
+-- Biometric Fraud Detection
+CREATE TABLE biometric_fraud_alerts (
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES users(id),
+alert_type VARCHAR(50), -- spoofing_attempt, multiple_failed_auth, device_mismatch
+severity VARCHAR(20), -- low, medium, high, critical
+details JSONB,
+detected_at TIMESTAMP DEFAULT NOW(),
+resolved BOOLEAN DEFAULT false,
+resolved_at TIMESTAMP,
+INDEX idx_user_alerts (user_id, detected_at DESC),
+INDEX idx_severity_unresolved (severity, resolved)
+);
+-- Quantum-Safe Key Storage
+CREATE TABLE quantum_keys (
+id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+user_id UUID REFERENCES users(id),
+key_type VARCHAR(50), -- dilithium, kyber, sphincs
+public_key TEXT NOT NULL,
+encrypted_private_key TEXT NOT NULL, -- Encrypted with biometric-derived key
+created_at TIMESTAMP DEFAULT NOW(),
+rotated_at TIMESTAMP,
+status VARCHAR(20) DEFAULT 'active'
+);
