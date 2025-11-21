@@ -10,6 +10,7 @@ import VerificationLog from "@/pages/verification-log";
 import Settings from "@/pages/settings";
 import TokenizedKYC from "@/pages/tokenized-kyc";
 import InteractiveDeck from "@/pages/interactive-deck";
+import OfflineCBDCDemo from "@/pages/offline-cbdc-demo";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/settings" component={Settings} />
       <Route path="/tokenized-kyc" component={TokenizedKYC} />
       <Route path="/demo" component={InteractiveDeck} />
+      <Route path="/offline-cbdc" component={OfflineCBDCDemo} />
       <Route component={NotFound} />
     </Switch>
   );
