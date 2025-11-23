@@ -10,7 +10,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
     { icon: Wallet, label: "Smart Wallet", href: "/wallet" },
     { icon: FileCheck, label: "Tokenized KYC", href: "/tokenized-kyc" },
-    { icon: Presentation, label: "Live Demo Deck", href: "/demo" },
     { icon: Laptop2, label: "Offline CBDC Demo", href: "/offline-cbdc" },
     { icon: ScanLine, label: "Biometric Enrollment", href: "/enroll" },
     { icon: History, label: "Verification Log", href: "/logs" },
@@ -25,7 +24,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <img src={logo} alt="Logo" className="w-8 h-8 animate-pulse" />
           <div>
             <h1 className="font-heading font-bold text-lg tracking-wider text-primary">AssetGrid™</h1>
-            <p className="text-xs text-muted-foreground tracking-widest">Q₹M MESH</p>
+            <p className="text-xs text-muted-foreground tracking-widest">QUANTUM_RUPEE(Q₹)</p>
           </div>
         </div>
 
