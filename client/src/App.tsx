@@ -13,6 +13,7 @@ import InteractiveDeck from "@/pages/interactive-deck";
 import OfflineCBDCDemo from "@/pages/offline-cbdc-demo";
 import WalletPage from "@/pages/wallet";
 import PaymentIntegration from "@/pages/payment-integration";
+import OfflinePaymentSim from "@/pages/offline-payment-sim";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/offline-cbdc" component={OfflineCBDCDemo} />
       <Route path="/wallet" component={WalletPage} />
       <Route path="/payment-demo" component={PaymentIntegration} />
+      <Route path="/offline-payment-sim" component={OfflinePaymentSim} />
       <Route component={NotFound} />
     </Switch>
   );
