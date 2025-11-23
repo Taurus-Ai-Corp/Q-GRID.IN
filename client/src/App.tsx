@@ -12,6 +12,7 @@ import TokenizedKYC from "@/pages/tokenized-kyc";
 import InteractiveDeck from "@/pages/interactive-deck";
 import OfflineCBDCDemo from "@/pages/offline-cbdc-demo";
 import WalletPage from "@/pages/wallet";
+import PaymentIntegration from "@/pages/payment-integration";
 
 function Router() {
   return (
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/demo" component={InteractiveDeck} />
       <Route path="/offline-cbdc" component={OfflineCBDCDemo} />
       <Route path="/wallet" component={WalletPage} />
+      <Route path="/payment-demo" component={PaymentIntegration} />
       <Route component={NotFound} />
     </Switch>
   );

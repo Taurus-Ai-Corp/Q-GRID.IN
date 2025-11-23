@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut, FileCheck, Presentation, Laptop2, Wallet } from "lucide-react";
+import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut, FileCheck, Presentation, Laptop2, Wallet, Database } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@assets/generated_images/assetgrid_quantum_logo.png";
 
@@ -13,6 +13,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { icon: Laptop2, label: "Offline CBDC Demo", href: "/offline-cbdc" },
     { icon: ScanLine, label: "Biometric Enrollment", href: "/enroll" },
     { icon: History, label: "Verification Log", href: "/logs" },
+    { icon: Database, label: "x402 Payment DB", href: "/payment-demo" },
     { icon: Settings, label: "Security Settings", href: "/settings" },
   ];
 
