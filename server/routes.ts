@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertKycUserSchema, insertPaymentTransactionSchema, insertKycCredentialSchema } from "@shared/schema";
+import { insertKycUserSchema, insertPaymentTransactionSchema, insertKycCredentialSchema, insertOfflineDeviceSchema, insertMeshTransactionSchema, insertSettlementBatchSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // KYC Users endpoints
@@ -145,6 +145,112 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Verification error:", error);
       res.status(500).json({ error: "Verification failed" });
+    }
+  });
+
+  // Offline CBDC endpoints
+  app.get("/api/offline/devices", async (req, res) => {
+    try {
+      const devices = await storage.getAllOfflineDevices();
+      res.json(devices);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch devices" });
+    }
+  });
+
+  app.post("/api/offline/devices", async (req, res) => {
+    try {
+      const validatedData = insertOfflineDeviceSchema.parse(req.body);
+      const device = await storage.createOfflineDevice(validatedData);
+      res.status(201).json(device);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request data" });
+    }
+  });
+
+  app.get("/api/offline/transactions", async (req, res) => {
+    try {
+      const transactions = await storage.getAllMeshTransactions();
+      res.json(transactions);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  app.post("/api/offline/transactions", async (req, res) => {
+    try {
+      const validatedData = insertMeshTransactionSchema.parse(req.body);
+      const transaction = await storage.createMeshTransaction(validatedData);
+      
+      // Update device balances
+      const fromDevice = await storage.getOfflineDevice(validatedData.fromDeviceId);
+      const toDevice = await storage.getOfflineDevice(validatedData.toDeviceId);
+      
+      if (fromDevice && toDevice) {
+        const fromBalance = parseFloat(fromDevice.balance || '0');
+        const toBalance = parseFloat(toDevice.balance || '0');
+        const amount = parseFloat(validatedData.amount);
+        
+        await storage.updateDeviceBalance(validatedData.fromDeviceId, (fromBalance - amount).toString());
+        await storage.updateDeviceBalance(validatedData.toDeviceId, (toBalance + amount).toString());
+      }
+      
+      res.status(201).json(transaction);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request data" });
+    }
+  });
+
+  app.get("/api/offline/batches", async (req, res) => {
+    try {
+      const batches = await storage.getAllSettlementBatches();
+      res.json(batches);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch batches" });
+    }
+  });
+
+  app.post("/api/offline/settle", async (req, res) => {
+    try {
+      // Get all pending transactions
+      const pending = await storage.getPendingMeshTransactions();
+      
+      if (pending.length === 0) {
+        return res.json({ message: "No pending transactions to settle" });
+      }
+
+      // Calculate total amount
+      const totalAmount = pending.reduce((sum, tx) => {
+        return sum + parseFloat(tx.amount || '0');
+      }, 0);
+
+      // Create settlement batch
+      const batch = await storage.createSettlementBatch({
+        batchSize: pending.length,
+        totalAmount: totalAmount.toString(),
+        status: "PROCESSING"
+      });
+
+      // Simulate Hedera settlement
+      const hederaTxId = `0.0.123456@${Date.now()}.${Math.floor(Math.random() * 1000000)}`;
+      
+      // Update all transactions
+      for (const tx of pending) {
+        await storage.updateMeshTransactionStatus(tx.id, "CONFIRMED", hederaTxId);
+      }
+
+      // Update batch status
+      const confirmedBatch = await storage.updateSettlementBatchStatus(batch.id, "CONFIRMED", hederaTxId);
+
+      res.json({
+        message: "Settlement successful",
+        batch: confirmedBatch,
+        transactionsSettled: pending.length,
+        hederaTransactionId: hederaTxId
+      });
+    } catch (error) {
+      console.error("Settlement error:", error);
+      res.status(500).json({ error: "Settlement failed" });
     }
   });
 
