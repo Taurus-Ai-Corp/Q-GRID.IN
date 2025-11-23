@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import Layout from "@/components/layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Smartphone, Store, Heart, Zap, Shield, Network, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { Smartphone, Store, Heart, Zap, Shield, Network, CheckCircle2, Clock, ArrowRight, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 
 interface Device {
@@ -79,6 +81,7 @@ const scenarios = [
 ];
 
 export default function OfflinePaymentSim() {
+  const [, setLocation] = useLocation();
   const [devices, setDevices] = useState<Device[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [batches, setBatches] = useState<SettlementBatch[]>([]);
@@ -194,8 +197,19 @@ export default function OfflinePaymentSim() {
   const confirmedCount = transactions.filter(t => t.status === "CONFIRMED").length;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-950 via-purple-950/20 to-gray-950 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <Layout>
+      <div className="space-y-6">
+        {/* Back Button */}
+        <Button
+          variant="ghost"
+          onClick={() => setLocation("/")}
+          className="mb-4"
+          data-testid="button-back-dashboard"
+        >
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Dashboard
+        </Button>
+
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3">
@@ -463,6 +477,6 @@ export default function OfflinePaymentSim() {
           </CardContent>
         </Card>
       </div>
-    </div>
+    </Layout>
   );
 }
