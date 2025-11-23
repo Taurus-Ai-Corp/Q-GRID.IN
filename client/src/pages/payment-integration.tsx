@@ -10,6 +10,7 @@ import { AlertCircle, CheckCircle2, Database, DollarSign, Lock, Server, Shield, 
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import type { KycUser, PaymentTransaction, KycCredential } from "@shared/schema";
 
 export default function PaymentIntegration() {
   const queryClient = useQueryClient();
@@ -21,19 +22,19 @@ export default function PaymentIntegration() {
   const addLog = (msg: string) => setLogs(prev => [`[${new Date().toLocaleTimeString()}] ${msg}`, ...prev]);
 
   // Fetch all users
-  const { data: users = [] } = useQuery({
+  const { data: users = [] } = useQuery<KycUser[]>({
     queryKey: ['/api/kyc/users'],
     refetchInterval: 2000
   });
 
   // Fetch all payments
-  const { data: payments = [] } = useQuery({
+  const { data: payments = [] } = useQuery<PaymentTransaction[]>({
     queryKey: ['/api/payments'],
     refetchInterval: 2000
   });
 
   // Fetch all credentials
-  const { data: credentials = [] } = useQuery({
+  const { data: credentials = [] } = useQuery<KycCredential[]>({
     queryKey: ['/api/credentials'],
     refetchInterval: 2000
   });
