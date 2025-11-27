@@ -3,12 +3,28 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Wallet, ArrowRightLeft, Send, QrCode, ShieldCheck, Building2, FileText, Activity, AlertTriangle, Globe, CheckCircle2 } from "lucide-react";
+import { Wallet, ArrowRightLeft, Send, QrCode, ShieldCheck, Building2, FileText, Activity, AlertTriangle, Globe, CheckCircle2, Plug, ExternalLink } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const WALLET_TYPES = [
+  { id: "metamask", name: "MetaMask", icon: "🦊", description: "EVM-compatible wallets" },
+  { id: "hedera", name: "Hedera Wallet", icon: "ħ", description: "Native Hedera support" },
+  { id: "ledger", name: "Ledger", icon: "💳", description: "Hardware wallet" },
+  { id: "trezor", name: "Trezor", icon: "🔐", description: "Hardware wallet" },
+  { id: "walletconnect", name: "WalletConnect", icon: "🔗", description: "Any WC wallet" },
+];
 
 export default function WalletPage() {
   const [activeTab, setActiveTab] = useState("crypto");
+  const [connectedWallet, setConnectedWallet] = useState<string | null>(null);
+
+  const handleConnectWallet = (walletId: string) => {
+    setConnectedWallet(walletId);
+    const wallet = WALLET_TYPES.find(w => w.id === walletId);
+    toast.success(`${wallet?.name} wallet connected!`);
+  };
 
   const ASSETS = [
     { symbol: "HBAR", name: "Hedera", balance: "15,420.50", value: "$1,850.46", change: "+5.2%", icon: "ħ" },
@@ -123,8 +139,38 @@ export default function WalletPage() {
             </Card>
           </div>
 
-          {/* Right Column: Compliance & Security */}
+          {/* Right Column: Wallet Connection & Compliance */}
           <div className="space-y-6">
+            <Card className="border-cyan-500/30 bg-gradient-to-br from-cyan-500/5 to-purple-500/5">
+              <CardHeader>
+                <CardTitle className="font-heading flex items-center gap-2">
+                  <Plug className="w-5 h-5 text-cyan-400" />
+                  Connect Wallet
+                </CardTitle>
+                <CardDescription>Choose your preferred wallet provider</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {WALLET_TYPES.map((wallet) => (
+                  <Button
+                    key={wallet.id}
+                    variant={connectedWallet === wallet.id ? "default" : "outline"}
+                    className="w-full justify-start h-auto p-3"
+                    onClick={() => handleConnectWallet(wallet.id)}
+                    data-testid={`button-connect-${wallet.id}`}
+                  >
+                    <span className="text-lg mr-3">{wallet.icon}</span>
+                    <div className="text-left flex-1">
+                      <p className="text-sm font-semibold">{wallet.name}</p>
+                      <p className="text-xs opacity-70">{wallet.description}</p>
+                    </div>
+                    {connectedWallet === wallet.id && (
+                      <CheckCircle2 className="w-4 h-4 ml-auto text-emerald-400" />
+                    )}
+                  </Button>
+                ))}
+              </CardContent>
+            </Card>
+
             <Card className="border-primary/20">
                <CardHeader>
                   <CardTitle className="font-heading flex items-center gap-2">

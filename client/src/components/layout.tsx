@@ -1,10 +1,12 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut, FileCheck, Presentation, Laptop2, Wallet, Database, Network } from "lucide-react";
+import { LayoutDashboard, Shield, ScanLine, History, Settings, LogOut, FileCheck, Presentation, Laptop2, Wallet, Database, Network, Plug } from "lucide-react";
 import { cn } from "@/lib/utils";
 import logo from "@assets/generated_images/assetgrid_quantum_logo.png";
+import { useState } from "react";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+  const [isConnected, setIsConnected] = useState(false);
 
   const navItems = [
     { icon: LayoutDashboard, label: "Dashboard", href: "/" },
@@ -58,9 +60,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <div className="h-full w-[85%] bg-gradient-to-r from-primary to-secondary animate-pulse" />
             </div>
           </div>
-          <button className="flex items-center gap-3 px-4 py-3 w-full text-destructive hover:bg-destructive/10 rounded-md transition-colors">
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Disconnect</span>
+          <button 
+            onClick={() => {
+              if (isConnected) {
+                setIsConnected(false);
+              } else {
+                setLocation("/wallet");
+              }
+            }}
+            className={cn(
+              "flex items-center gap-3 px-4 py-3 w-full rounded-md transition-colors",
+              isConnected 
+                ? "text-destructive hover:bg-destructive/10" 
+                : "text-primary hover:bg-primary/10"
+            )}
+            data-testid="button-wallet-connect"
+          >
+            {isConnected ? (
+              <>
+                <LogOut className="w-5 h-5" />
+                <span className="font-medium">Disconnect</span>
+              </>
+            ) : (
+              <>
+                <Plug className="w-5 h-5" />
+                <span className="font-medium">Connect Wallet</span>
+              </>
+            )}
           </button>
         </div>
       </aside>
