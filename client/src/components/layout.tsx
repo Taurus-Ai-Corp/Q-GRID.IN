@@ -14,7 +14,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { icon: Network, label: "Offline Payment Sim", href: "/offline-payment-sim" },
     { icon: ScanLine, label: "Biometric Enrollment", href: "/enroll" },
     { icon: History, label: "Verification Log", href: "/logs" },
-    { icon: Database, label: "x402 Payment DB", href: "/payment-demo" },
+    { icon: Database, label: "Grid Pay Infra", href: "/payment-demo" },
     { icon: Settings, label: "Security Settings", href: "/settings" },
   ];
 

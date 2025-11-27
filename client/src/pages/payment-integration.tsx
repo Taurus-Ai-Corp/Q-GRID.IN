@@ -150,8 +150,8 @@ export default function PaymentIntegration() {
       <div className="space-y-6 max-w-6xl mx-auto">
         <div className="flex justify-between items-end">
           <div>
-            <h1 className="text-3xl font-heading font-bold mb-2 text-primary">HTTP x402 Payment Integration</h1>
-            <p className="text-muted-foreground">Real-time micropayment infrastructure with PostgreSQL backend.</p>
+            <h1 className="text-3xl font-heading font-bold mb-2 text-primary">Grid Pay Infra • Unlimited Off/On</h1>
+            <p className="text-muted-foreground">Flexible micropayment infrastructure with on-demand activation and PostgreSQL backend.</p>
           </div>
           <div className="flex gap-2">
             <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
