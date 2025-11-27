@@ -28,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <img src={logo} alt="Logo" className="w-8 h-8 animate-pulse" />
           <div>
             <h1 className="font-heading font-bold text-lg tracking-wider text-primary">AssetGrid™</h1>
-            <p className="text-xs text-muted-foreground tracking-widest">QUANTUM_RUPEE(Q₹)</p>
+            <p className="text-muted-foreground tracking-widest text-[14px]">QUANTUM_RUPEE(Q₹)</p>
           </div>
         </div>
 
@@ -90,7 +90,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </button>
         </div>
       </aside>
-
       {/* Main Content */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
         {/* Background Grid Effect */}
