@@ -1,12 +1,14 @@
 import { db } from "./db";
-import { kycUsers, paymentTransactions, kycCredentials, offlineDevices, meshTransactions, settlementBatches } from "@shared/schema";
+import { kycUsers, paymentTransactions, kycCredentials, offlineDevices, meshTransactions, settlementBatches, biometricProfiles, verificationLogs } from "@shared/schema";
 import type { 
   KycUser, InsertKycUser,
   PaymentTransaction, InsertPaymentTransaction,
   KycCredential, InsertKycCredential,
   OfflineDevice, InsertOfflineDevice,
   MeshTransaction, InsertMeshTransaction,
-  SettlementBatch, InsertSettlementBatch
+  SettlementBatch, InsertSettlementBatch,
+  BiometricProfile, InsertBiometricProfile,
+  VerificationLog, InsertVerificationLog
 } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
 
@@ -50,6 +52,19 @@ export interface IStorage {
   createSettlementBatch(batch: InsertSettlementBatch): Promise<SettlementBatch>;
   updateSettlementBatchStatus(id: string, status: string, hederaTxId?: string): Promise<SettlementBatch | undefined>;
   getAllSettlementBatches(): Promise<SettlementBatch[]>;
+
+  // Biometric Profiles
+  getBiometricProfile(id: string): Promise<BiometricProfile | undefined>;
+  getBiometricProfilesByUser(userId: string): Promise<BiometricProfile[]>;
+  createBiometricProfile(profile: InsertBiometricProfile): Promise<BiometricProfile>;
+  updateBiometricProfileStatus(id: string, status: string): Promise<BiometricProfile | undefined>;
+  getAllBiometricProfiles(): Promise<BiometricProfile[]>;
+
+  // Verification Logs
+  getVerificationLog(id: string): Promise<VerificationLog | undefined>;
+  getVerificationLogsByUser(userId: string): Promise<VerificationLog[]>;
+  createVerificationLog(log: InsertVerificationLog): Promise<VerificationLog>;
+  getAllVerificationLogs(): Promise<VerificationLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -229,6 +244,60 @@ export class DatabaseStorage implements IStorage {
 
   async getAllSettlementBatches(): Promise<SettlementBatch[]> {
     return db.select().from(settlementBatches).orderBy(desc(settlementBatches.createdAt));
+  }
+
+  // Biometric Profiles
+  async getBiometricProfile(id: string): Promise<BiometricProfile | undefined> {
+    const [profile] = await db.select().from(biometricProfiles).where(eq(biometricProfiles.id, id));
+    return profile;
+  }
+
+  async getBiometricProfilesByUser(userId: string): Promise<BiometricProfile[]> {
+    return db.select().from(biometricProfiles)
+      .where(eq(biometricProfiles.userId, userId))
+      .orderBy(desc(biometricProfiles.createdAt));
+  }
+
+  async createBiometricProfile(insertProfile: InsertBiometricProfile): Promise<BiometricProfile> {
+    const [profile] = await db.insert(biometricProfiles).values(insertProfile).returning();
+    return profile;
+  }
+
+  async updateBiometricProfileStatus(id: string, status: string): Promise<BiometricProfile | undefined> {
+    const [profile] = await db
+      .update(biometricProfiles)
+      .set({ 
+        status,
+        ...(status === 'ACTIVE' && { enrolledAt: new Date(), lastVerifiedAt: new Date() })
+      })
+      .where(eq(biometricProfiles.id, id))
+      .returning();
+    return profile;
+  }
+
+  async getAllBiometricProfiles(): Promise<BiometricProfile[]> {
+    return db.select().from(biometricProfiles).orderBy(desc(biometricProfiles.createdAt));
+  }
+
+  // Verification Logs
+  async getVerificationLog(id: string): Promise<VerificationLog | undefined> {
+    const [log] = await db.select().from(verificationLogs).where(eq(verificationLogs.id, id));
+    return log;
+  }
+
+  async getVerificationLogsByUser(userId: string): Promise<VerificationLog[]> {
+    return db.select().from(verificationLogs)
+      .where(eq(verificationLogs.userId, userId))
+      .orderBy(desc(verificationLogs.createdAt));
+  }
+
+  async createVerificationLog(insertLog: InsertVerificationLog): Promise<VerificationLog> {
+    const [log] = await db.insert(verificationLogs).values(insertLog).returning();
+    return log;
+  }
+
+  async getAllVerificationLogs(): Promise<VerificationLog[]> {
+    return db.select().from(verificationLogs).orderBy(desc(verificationLogs.createdAt));
   }
 }
 

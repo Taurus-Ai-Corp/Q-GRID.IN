@@ -1,6 +1,6 @@
 import Layout from "@/components/layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BIOMETRIC_TYPES, MOCK_USER, MOCK_PROFILES, MOCK_LOGS } from "@/lib/mock-data";
+import { BIOMETRIC_TYPES } from "@/lib/constants";
 import { BiometricCard } from "@/components/biometric-card";
 import { useLocation } from "wouter";
 import { ShieldCheck, TrendingUp, Activity, Lock } from "lucide-react";
@@ -8,14 +8,52 @@ import { CircularProgressbar, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+
+interface DashboardStats {
+  totalBalance: string;
+  securityScore: number;
+  activeProfiles: number;
+  totalProfiles: number;
+  recentLogs: {
+    id: string;
+    eventType: string;
+    method: string;
+    result: string;
+    location: string | null;
+    riskScore: number;
+    createdAt: string;
+  }[];
+}
+
+interface BiometricProfile {
+  id: string;
+  biometricType: string;
+  status: string;
+}
 
 export default function Dashboard() {
   const [, setLocation] = useLocation();
 
+  const { data: stats, isLoading: statsLoading } = useQuery<DashboardStats>({
+    queryKey: ['/api/dashboard/stats'],
+  });
+
+  const { data: profiles = [] } = useQuery<BiometricProfile[]>({
+    queryKey: ['/api/biometrics'],
+  });
+
   const getStatus = (typeId: string) => {
-    const profile = MOCK_PROFILES.find(p => p.type === typeId.toUpperCase() || p.type === BIOMETRIC_TYPES[typeId as keyof typeof BIOMETRIC_TYPES]?.id?.toUpperCase());
+    const profile = profiles.find(p => 
+      p.biometricType === typeId.toUpperCase() || 
+      p.biometricType === BIOMETRIC_TYPES[typeId.toUpperCase() as keyof typeof BIOMETRIC_TYPES]?.id?.toUpperCase()
+    );
     return profile ? profile.status : "NOT_ENROLLED";
   };
+
+  const balance = stats?.totalBalance || "0.00";
+  const securityScore = stats?.securityScore || 0;
+  const recentLogs = stats?.recentLogs || [];
 
   return (
     <Layout>
@@ -30,8 +68,8 @@ export default function Dashboard() {
               <CardTitle className="text-sm font-mono text-muted-foreground uppercase tracking-wider">Total Balance (QRM)</CardTitle>
             </CardHeader>
             <CardContent>
-              <h1 className="text-5xl font-bold font-heading text-white drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]">
-                {MOCK_USER.balance.split(" ")[0]}
+              <h1 className="text-5xl font-bold font-heading text-white drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]" data-testid="text-total-balance">
+                {balance.split(" ")[0]}
                 <span className="text-2xl text-primary ml-2">QRM</span>
               </h1>
               <div className="flex items-center gap-4 mt-4">
@@ -51,10 +89,10 @@ export default function Dashboard() {
             <CardContent className="flex flex-col items-center justify-center pt-0">
               <div className="w-32 h-32 font-heading font-bold">
                 <CircularProgressbar 
-                  value={MOCK_USER.securityScore} 
-                  text={`${MOCK_USER.securityScore}%`}
+                  value={securityScore} 
+                  text={`${securityScore}%`}
                   styles={buildStyles({
-                    pathColor: `rgba(0, 240, 255, ${MOCK_USER.securityScore / 100})`,
+                    pathColor: `rgba(0, 240, 255, ${securityScore / 100})`,
                     textColor: '#fff',
                     trailColor: 'rgba(255,255,255,0.1)',
                     textSize: '24px',
@@ -62,8 +100,10 @@ export default function Dashboard() {
                 />
               </div>
               <div className="mt-4 text-center">
-                <p className="text-sm font-medium text-primary">Excellent</p>
-                <p className="text-xs text-muted-foreground">3/5 Biometrics Active</p>
+                <p className="text-sm font-medium text-primary" data-testid="text-security-status">
+                  {securityScore >= 80 ? "Excellent" : securityScore >= 50 ? "Good" : "Needs Improvement"}
+                </p>
+                <p className="text-xs text-muted-foreground">{stats?.activeProfiles || 0}/5 Biometrics Active</p>
               </div>
             </CardContent>
           </Card>
@@ -99,28 +139,32 @@ export default function Dashboard() {
            </CardHeader>
            <CardContent>
               <div className="space-y-4">
-                {MOCK_LOGS.slice(0, 3).map((log) => (
-                  <div key={log.id} className="flex items-center justify-between p-4 rounded-lg bg-background/50 border border-border hover:border-primary/30 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className={cn("p-2 rounded-full", log.result === "SUCCESS" ? "bg-emerald-500/10 text-emerald-400" : "bg-destructive/10 text-destructive")}>
-                        {log.result === "SUCCESS" ? <Lock className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+                {recentLogs.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No verification logs yet. Complete a biometric enrollment to see activity here.</p>
+                ) : (
+                  recentLogs.slice(0, 3).map((log) => (
+                    <div key={log.id} className="flex items-center justify-between p-4 rounded-lg bg-background/50 border border-border hover:border-primary/30 transition-colors" data-testid={`log-item-${log.id}`}>
+                      <div className="flex items-center gap-4">
+                        <div className={cn("p-2 rounded-full", log.result === "SUCCESS" ? "bg-emerald-500/10 text-emerald-400" : "bg-destructive/10 text-destructive")}>
+                          {log.result === "SUCCESS" ? <Lock className="w-4 h-4" /> : <ShieldCheck className="w-4 h-4" />}
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{log.eventType}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(log.createdAt).toLocaleString()} • {log.location || "Unknown"}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-sm">{log.type}</p>
-                        <p className="text-xs text-muted-foreground">{log.timestamp} • {log.location}</p>
+                      <div className="text-right">
+                        <Badge variant="outline" className={cn(
+                          "mb-1",
+                           log.result === "SUCCESS" ? "border-emerald-500/50 text-emerald-400" : "border-destructive/50 text-destructive"
+                        )}>
+                          {log.result}
+                        </Badge>
+                        <p className="text-xs text-muted-foreground">Via {log.method}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className={cn(
-                        "mb-1",
-                         log.result === "SUCCESS" ? "border-emerald-500/50 text-emerald-400" : "border-destructive/50 text-destructive"
-                      )}>
-                        {log.result}
-                      </Badge>
-                      <p className="text-xs text-muted-foreground">Via {log.method}</p>
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
            </CardContent>
         </Card>

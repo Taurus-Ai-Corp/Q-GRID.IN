@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertKycUserSchema, insertPaymentTransactionSchema, insertKycCredentialSchema, insertOfflineDeviceSchema, insertMeshTransactionSchema, insertSettlementBatchSchema } from "@shared/schema";
+import { insertKycUserSchema, insertPaymentTransactionSchema, insertKycCredentialSchema, insertOfflineDeviceSchema, insertMeshTransactionSchema, insertSettlementBatchSchema, insertBiometricProfileSchema, insertVerificationLogSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // KYC Users endpoints
@@ -251,6 +251,104 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Settlement error:", error);
       res.status(500).json({ error: "Settlement failed" });
+    }
+  });
+
+  // Biometric Profiles endpoints
+  app.get("/api/biometrics", async (req, res) => {
+    try {
+      const profiles = await storage.getAllBiometricProfiles();
+      res.json(profiles);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch biometric profiles" });
+    }
+  });
+
+  app.get("/api/biometrics/user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const profiles = await storage.getBiometricProfilesByUser(userId);
+      res.json(profiles);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user biometric profiles" });
+    }
+  });
+
+  app.post("/api/biometrics", async (req, res) => {
+    try {
+      const validatedData = insertBiometricProfileSchema.parse(req.body);
+      const profile = await storage.createBiometricProfile(validatedData);
+      res.status(201).json(profile);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request data" });
+    }
+  });
+
+  app.patch("/api/biometrics/:id/status", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const profile = await storage.updateBiometricProfileStatus(id, status);
+      if (!profile) {
+        return res.status(404).json({ error: "Biometric profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to update biometric profile" });
+    }
+  });
+
+  // Verification Logs endpoints
+  app.get("/api/logs", async (req, res) => {
+    try {
+      const logs = await storage.getAllVerificationLogs();
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch verification logs" });
+    }
+  });
+
+  app.get("/api/logs/user/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const logs = await storage.getVerificationLogsByUser(userId);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user verification logs" });
+    }
+  });
+
+  app.post("/api/logs", async (req, res) => {
+    try {
+      const validatedData = insertVerificationLogSchema.parse(req.body);
+      const log = await storage.createVerificationLog(validatedData);
+      res.status(201).json(log);
+    } catch (error) {
+      res.status(400).json({ error: "Invalid request data" });
+    }
+  });
+
+  // Dashboard stats endpoint
+  app.get("/api/dashboard/stats", async (req, res) => {
+    try {
+      const users = await storage.getAllKycUsers();
+      const profiles = await storage.getAllBiometricProfiles();
+      const logs = await storage.getAllVerificationLogs();
+      
+      const activeProfiles = profiles.filter(p => p.status === 'ACTIVE').length;
+      const totalProfiles = profiles.length;
+      const securityScore = totalProfiles > 0 ? Math.round((activeProfiles / 5) * 100) : 0;
+      
+      res.json({
+        totalBalance: "2,450,000.00",
+        securityScore: Math.min(securityScore, 100),
+        activeProfiles,
+        totalProfiles,
+        recentLogs: logs.slice(0, 5),
+        users: users.slice(0, 5)
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch dashboard stats" });
     }
   });
 

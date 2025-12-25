@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, decimal, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, decimal, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -129,3 +129,48 @@ export type InsertMeshTransaction = z.infer<typeof insertMeshTransactionSchema>;
 
 export type SettlementBatch = typeof settlementBatches.$inferSelect;
 export type InsertSettlementBatch = z.infer<typeof insertSettlementBatchSchema>;
+
+// Biometric Profiles Table
+export const biometricProfiles = pgTable("biometric_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => kycUsers.id).notNull(),
+  biometricType: text("biometric_type").notNull(), // FACIAL_RECOGNITION, FINGERPRINT, VOICE_BIOMETRICS, IRIS_SCAN, BEHAVIORAL
+  status: text("status").notNull().default("NOT_ENROLLED"), // ACTIVE, NOT_ENROLLED, EXPIRED
+  enrolledAt: timestamp("enrolled_at"),
+  lastVerifiedAt: timestamp("last_verified_at"),
+  livenessScore: decimal("liveness_score", { precision: 5, scale: 2 }),
+  templateHash: text("template_hash"), // Encrypted biometric template hash
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Verification Logs Table
+export const verificationLogs = pgTable("verification_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").references(() => kycUsers.id),
+  eventType: text("event_type").notNull(), // Login, Transaction Auth, High Value Transfer, Settings Change
+  method: text("method").notNull(), // Facial Recognition, Fingerprint, Voice, Iris, Behavioral
+  result: text("result").notNull(), // SUCCESS, FAILED
+  location: text("location"),
+  ipAddress: text("ip_address"),
+  deviceInfo: text("device_info"),
+  riskScore: integer("risk_score").notNull().default(0), // 0-100
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Insert Schemas for new tables
+export const insertBiometricProfileSchema = createInsertSchema(biometricProfiles).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertVerificationLogSchema = createInsertSchema(verificationLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
+// Types for new tables
+export type BiometricProfile = typeof biometricProfiles.$inferSelect;
+export type InsertBiometricProfile = z.infer<typeof insertBiometricProfileSchema>;
+
+export type VerificationLog = typeof verificationLogs.$inferSelect;
+export type InsertVerificationLog = z.infer<typeof insertVerificationLogSchema>;

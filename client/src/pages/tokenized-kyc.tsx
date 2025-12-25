@@ -3,16 +3,37 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MOCK_KYC_CREDENTIALS, MOCK_AADHAAR_DATA } from "@/lib/mock-data";
 import { CheckCircle2, FileText, ShieldCheck, Loader2, Lock, Scan, Fingerprint } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
+const CREDENTIAL_EXAMPLE = {
+  id: "did:hedera:mainnet:...",
+  issuer: "AssetGrid Q₹M KYC Authority",
+  issuedAt: new Date().toISOString(),
+  expiresAt: new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(),
+  kycLevel: "FULL_KYC",
+  attributes: {
+    nameHash: "sha256:a1b2c3...",
+    aadhaarLastFour: "****",
+    dobHash: "sha256:d4e5f6...",
+    addressHash: "sha256:g7h8i9...",
+    biometricHash: "sha256:j0k1l2..."
+  },
+  proof: {
+    type: "CRYSTALSDilithiumSignature2024",
+    verificationMethod: "did:hedera:mainnet:...#keys-1"
+  }
+};
 
 export default function TokenizedKYC() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [verifying, setVerifying] = useState(false);
   const [step, setStep] = useState(1); // 1: Select, 2: Capture, 3: Verify, 4: Complete
+  const [issuedCredential, setIssuedCredential] = useState<typeof CREDENTIAL_EXAMPLE | null>(null);
 
   const handleAadhaarVerify = () => {
     setVerifying(true);
@@ -180,7 +201,7 @@ export default function TokenizedKYC() {
               <CardContent>
                 <div className="bg-black/50 p-4 rounded-md border border-primary/10 font-mono text-[10px] text-muted-foreground overflow-hidden relative">
                   <pre className={cn("transition-opacity duration-500", step === 4 ? "opacity-100" : "opacity-50 blur-[1px]")}>
-                    {JSON.stringify(step === 4 ? MOCK_KYC_CREDENTIALS : { status: "WAITING_FOR_ISSUANCE" }, null, 2)}
+                    {JSON.stringify(step === 4 ? (issuedCredential || CREDENTIAL_EXAMPLE) : { status: "WAITING_FOR_ISSUANCE" }, null, 2)}
                   </pre>
                   {step !== 4 && (
                     <div className="absolute inset-0 flex items-center justify-center">

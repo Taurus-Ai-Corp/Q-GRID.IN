@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { BIOMETRIC_TYPES } from "@/lib/mock-data";
+import { BIOMETRIC_TYPES } from "@/lib/constants";
 import { Camera, Fingerprint, Mic, CheckCircle2, Loader2, AlertCircle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Progress } from "@/components/ui/progress";
