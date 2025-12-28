@@ -42,7 +42,7 @@ const SLIDES = [
                >
                  <span className="text-muted-foreground">0x{Math.random().toString(16).substring(2, 10)}...</span>
                  <span className="text-emerald-400">CONFIRMED</span>
-                 <span className="text-primary ml-auto">{(Math.random() * 1000).toFixed(2)} QRM</span>
+                 <span className="text-primary ml-auto">{(Math.random() * 1000).toFixed(2)} Q₹M</span>
                </motion.div>
             ))}
          </div>
@@ -65,7 +65,7 @@ const paymentMiddleware = async (req, res, next) => {
   // 1. Verify Payment Proof on Hedera
   const isValid = await hederaClient.verifyPayment({
     hash: paymentHash,
-    minAmount: 500, // 5.00 QRM
+    minAmount: 500, // 5.00 Q₹M
     recipient: MERCHANT_WALLET
   });
 
@@ -145,7 +145,7 @@ export default function InteractiveDeck() {
             <div className="w-3 h-3 rounded-full bg-destructive" />
             <div className="w-3 h-3 rounded-full bg-yellow-500" />
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span className="ml-4 font-mono text-sm text-muted-foreground">Q_GRID_QRM_DEMO.exe</span>
+            <span className="ml-4 font-mono text-sm text-muted-foreground">Q_GRID_DEMO.exe</span>
          </div>
          <div className="font-heading font-bold text-primary tracking-widest">Q_GRID PRESENTATION</div>
       </header>
