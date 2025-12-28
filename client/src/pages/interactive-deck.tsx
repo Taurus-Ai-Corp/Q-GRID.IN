@@ -58,7 +58,7 @@ const SLIDES = [
     subtitle: "Seamless Payment Integration",
     content: (
       <div className="w-full h-80 bg-[#0d1117] rounded-lg border border-muted overflow-hidden p-4 font-mono text-xs text-gray-300 overflow-y-auto">
-        <pre>{`// AssetGrid Middleware
+        <pre>{`// Q_GRID Middleware
 const paymentMiddleware = async (req, res, next) => {
   const { paymentHash } = req.headers;
   
