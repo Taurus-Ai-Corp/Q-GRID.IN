@@ -11,7 +11,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const CREDENTIAL_EXAMPLE = {
   id: "did:hedera:mainnet:...",
-  issuer: "AssetGrid Q₹M KYC Authority",
+  issuer: "Q_GRID.taurusai.in KYC Authority",
   issuedAt: new Date().toISOString(),
   expiresAt: new Date(Date.now() + 10 * 365 * 24 * 60 * 60 * 1000).toISOString(),
   kycLevel: "FULL_KYC",
@@ -222,7 +222,7 @@ export default function TokenizedKYC() {
               <CardContent>
                 <p className="text-sm text-muted-foreground">
                   This credential can be used for offline CBDC wallet creation on the 
-                  <span className="text-primary font-bold"> AssetGrid Mesh</span>.
+                  <span className="text-primary font-bold"> Q_GRID.taurusai.in Mesh</span>.
                 </p>
               </CardContent>
             </Card>

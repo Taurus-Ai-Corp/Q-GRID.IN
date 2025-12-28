@@ -14,7 +14,7 @@ import ledgerImage from "@assets/generated_images/distributed_ledger_consensus.p
 const SLIDES = [
   {
     id: "intro",
-    title: "AssetGrid (Q₹M)",
+    title: "Q_GRID.taurusai.in (Q₹M)",
     subtitle: "India's Quantum Rupee Mesh",
     content: (
       <div className="flex flex-col items-center justify-center h-full text-center space-y-8">
@@ -458,7 +458,7 @@ export default function OfflineCBDCDemo() {
       <header className="h-14 border-b border-border flex items-center justify-between px-6 bg-card/80 backdrop-blur z-50">
          <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            <span className="font-mono text-xs text-primary tracking-widest">ASSETGRID_Q₹M.exe</span>
+            <span className="font-mono text-xs text-primary tracking-widest">Q_GRID_Q₹M.exe</span>
          </div>
          <div className="text-xs text-muted-foreground">OFFLINE CBDC ARCHITECTURE DEMO</div>
       </header>

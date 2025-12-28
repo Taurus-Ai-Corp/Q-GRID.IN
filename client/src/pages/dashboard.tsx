@@ -65,19 +65,19 @@ export default function Dashboard() {
               <ShieldCheck className="w-48 h-48" />
             </div>
             <CardHeader>
-              <CardTitle className="text-sm font-mono text-muted-foreground uppercase tracking-wider">Total Balance (QRM)</CardTitle>
+              <CardTitle className="text-sm font-mono text-muted-foreground uppercase tracking-wider">Total Balance (Q₹M)</CardTitle>
             </CardHeader>
             <CardContent>
-              <h1 className="text-5xl font-bold font-heading text-white drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]" data-testid="text-total-balance">
+                <h1 className="text-5xl font-bold font-heading text-white drop-shadow-[0_0_10px_rgba(0,240,255,0.5)]" data-testid="text-total-balance">
                 {balance.split(" ")[0]}
-                <span className="text-2xl text-primary ml-2">QRM</span>
+                <span className="text-2xl text-primary ml-2">Q₹M</span>
               </h1>
               <div className="flex items-center gap-4 mt-4">
                 <div className="flex items-center gap-1 text-emerald-400 text-sm bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">
                   <TrendingUp className="w-4 h-4" />
                   <span>+2.4% (24h)</span>
                 </div>
-                <p className="text-xs text-muted-foreground">Protected by Quantum-Resistant Encryption</p>
+                <p className="text-xs text-muted-foreground">Protected by Q_GRID.taurusai.in Mesh</p>
               </div>
             </CardContent>
           </Card>

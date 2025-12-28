@@ -9,7 +9,7 @@ const SLIDES = [
   {
     id: "hero",
     title: "Experience Instant Global Payments",
-    subtitle: "AssetGrid (Q₹M) - Quantum Rupee Mesh",
+    subtitle: "Q_GRID.taurusai.in (Q₹M) - Quantum Rupee Mesh",
     content: (
       <div className="flex flex-col items-center justify-center h-64">
         <div className="relative w-32 h-32 mb-8">
@@ -145,9 +145,9 @@ export default function InteractiveDeck() {
             <div className="w-3 h-3 rounded-full bg-destructive" />
             <div className="w-3 h-3 rounded-full bg-yellow-500" />
             <div className="w-3 h-3 rounded-full bg-emerald-500" />
-            <span className="ml-4 font-mono text-sm text-muted-foreground">ASSETGRID_QRM_DEMO.exe</span>
+            <span className="ml-4 font-mono text-sm text-muted-foreground">Q_GRID_QRM_DEMO.exe</span>
          </div>
-         <div className="font-heading font-bold text-primary tracking-widest">ASSETGRID PRESENTATION</div>
+         <div className="font-heading font-bold text-primary tracking-widest">Q_GRID PRESENTATION</div>
       </header>
 
       {/* Main Slide Area */}

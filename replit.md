@@ -1,8 +1,8 @@
-# AssetGrid™ QUANTUM_RUPEE (Q₹) - Blockchain-Based Digital Identity & Payment System
+# Q_GRID.taurusai.in - Blockchain-Based Digital Identity & Payment System
 
 ## Overview
 
-AssetGrid™ QUANTUM_RUPEE is a comprehensive blockchain-based platform that combines tokenized KYC (Know Your Customer) identity verification with quantum-resistant payment infrastructure. The system leverages Hedera Hashgraph for distributed ledger operations and integrates multiple advanced features including biometric authentication, offline CBDC (Central Bank Digital Currency) capabilities, and HTTP x402 micropayment protocol.
+Q_GRID.taurusai.in is a comprehensive blockchain-based platform that combines tokenized KYC (Know Your Customer) identity verification with quantum-resistant payment infrastructure. The system leverages Hedera Hashgraph for distributed ledger operations and integrates multiple advanced features including biometric authentication, offline CBDC (Central Bank Digital Currency) capabilities, and HTTP x402 micropayment protocol.
 
 **Core Value Propositions:**
 - **Tokenized KYC**: Convert physical identity documents (Aadhaar, DigiLocker) into W3C Verifiable Credentials with 90% cost reduction (₹150-300 → ₹15 per verification)

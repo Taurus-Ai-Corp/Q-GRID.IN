@@ -1,5 +1,7 @@
 import { Scan, Fingerprint, Mic, Eye, Activity } from "lucide-react";
 
+export const APP_NAME = "Q_GRID.taurusai.in";
+
 export const BIOMETRIC_TYPES = {
   FACIAL_RECOGNITION: {
     id: "facial",

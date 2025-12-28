@@ -27,7 +27,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <div className="p-6 flex items-center gap-3 border-b border-sidebar-border">
           <img src={logo} alt="Logo" className="w-8 h-8 animate-pulse" />
           <div>
-            <h1 className="font-heading font-bold text-lg tracking-wider text-primary">AssetGrid™</h1>
+            <h1 className="font-heading font-bold text-lg tracking-wider text-primary">Q_GRID.taurusai.in</h1>
             <p className="text-muted-foreground tracking-widest text-[14px]">QUANTUM_RUPEE(Q₹)</p>
           </div>
         </div>
