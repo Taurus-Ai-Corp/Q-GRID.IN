@@ -28,7 +28,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <img src={logo} alt="Logo" className="w-8 h-8 animate-pulse" />
           <div>
             <h1 className="font-heading font-bold text-lg tracking-wider text-primary">Q_GRID.IN</h1>
-            <p className="text-muted-foreground tracking-widest text-[14px]">QUANTUM_RUPEE(Q₹)</p>
+            <p className="text-muted-foreground tracking-widest text-[14px]">QUANTUM_RUPEE_MESH</p>
           </div>
         </div>
 
